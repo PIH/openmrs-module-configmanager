@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+    Potential format for specifying configurations to set up
+    Each config element would run independently and, like liquibase, generate a checksum to determine if it has previously run or not
+    Checksums will be fully configurable per handler, with a generic implementation that uses a combination of the file checksum + handler and parameters
+    If current checksum matches a previous checksum, then it will not be re-run, unless (in some future iteration) we add an additional attribute to force it to
+    Unlike liquibase, if a checksum differs, the configuration will re-run in order to bring the system to the expected state, much like metadatadeploy.
+-->
+
+<configurations>
+
+    <!-- Set up Core Users and Providers -->
+    <config file="procedures/ensure_user.sql" handler="sql-handler"/>
+    <config file="procedures/ensure_user_roles.sql" handler="sql-handler"/>
+    <config file="procedures/ensure_role_privilege.sql" handler="sql-handler"/>
+    <config file="procedures/ensure_provider.sql" handler="sql-handler"/>
+    <config file="users/core-users.sql" handler="sql-handler"/>                                    <!-- NOTE: We want to support a generic SQL handler to get up and running quickly -->
+    <config file="users/test-users.sql" handler="sql-handler" tags="test"/>                        <!-- NOTE: Use of tags to support conditional configuration -->
+
+    <!-- Set up Core Metadata -->
+    <config file="metadata/locations.csv" handler="location-handler"/>                             <!-- NOTE: For these, we might be able to have a generic metadata-handler -->
+    <config file="metadata/patient-identifiers.csv" handler="patient-identifier-handler"/>
+    <config file="metadata/person_attribute_types.csv" handler="person-attribute-type-handler"/>
+    <config file="metadata/visit-types.csv" handler="visit-type-handler"/>
+    <config file="metadata/encounter-types.csv" handler="encounter-type-handler"/>
+    <config file="metadata/order-types.csv" handler="order-type-handler"/>
+
+    <!-- Set up Address Configuration -->
+    <config file="addresshierarchy/address-levels.csv" handler="address-level-handler"/>
+    <config file="addresshierarchy/address-entries.csv" handler="address-hierarchy-handler">
+        <parameter name="entrySeparator" value="\|"/>                                               <!-- NOTE: Use of ability to pass parameters to a handler -->
+        <parameter name="identifierSeparator" value="\^"/>
+    </config>
+
+    <!-- Set up Concepts -->
+    <config file="concepts/core-concepts.csv" handler="concept-handler"/>
+    <config file="concepts/registration-concepts.csv" handler="concept-handler"/>
+    <config file="concepts/vitals-concepts.csv" handler="concept-handler"/>
+    <config file="concepts/diagnosis-concepts.csv" handler="diagnosis-concept-handler"/>            <!-- NOTE: Use of more specific diagnosis handler which is likely a subclass for a more a generic concept handler -->
+    <config file="concepts/opd-consultation-concepts.csv" handler="concept-handler"/>
+
+    <!-- Set up Reports -->
+    <config file="reports/registration-export.xml" handler="report-handler"/>
+
+    <!-- Set up Global Properties -->
+    <config file="settings/global-properties.json" handler="global-property-handler"/>              <!-- NOTE: JSON, might also be support of properties file as the format -->
+
+</configurations>

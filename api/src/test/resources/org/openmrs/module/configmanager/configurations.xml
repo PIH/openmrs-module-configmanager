@@ -1,0 +1,7 @@
+<configurations>
+    <config file="addresshierarchy/address-levels.csv" handler="address-level-handler"/>
+    <config file="addresshierarchy/address-entries.csv" handler="address-hierarchy-handler">
+        <parameter name="entrySeparator" value="\|"/>
+        <parameter name="identifierSeparator" value="\^"/>
+    </config>
+</configurations>
