@@ -7,7 +7,9 @@ import org.openmrs.module.configmanager.schema.ConfigParameter;
 import org.openmrs.module.configmanager.service.ConfigManagerService;
 import org.springframework.stereotype.Component;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.util.List;
 
 /**
@@ -27,12 +29,20 @@ public class SqlHandler extends BaseConfigurationHandler {
      * Handles a single configuration item that is passed into it in order to process it
      */
     public void handle(File configFile, List<ConfigParameter> parameters) {
+        BufferedReader reader = null;
         try {
-            String[] statements = ConfigUtil.parseScriptIntoStatements(configFile);
+            reader = new BufferedReader(new FileReader(configFile));
+            String[] statements = ConfigUtil.parseScriptIntoStatements(reader);
             Context.getService(ConfigManagerService.class).executeSql(statements);
         }
         catch (Exception e) {
             throw new ConfigurationException("Unable to execute SQL file at " + configFile, e);
+        }
+        finally {
+            try {
+                reader.close();
+            }
+            catch (Exception e) {}
         }
     }
 }

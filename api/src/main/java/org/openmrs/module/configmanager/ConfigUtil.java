@@ -21,11 +21,13 @@ import org.apache.commons.logging.LogFactory;
 import org.openmrs.GlobalProperty;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.configmanager.schema.ConfigurationList;
+import org.openmrs.module.configmanager.service.ConfigManagerService;
 import org.openmrs.util.OpenmrsConstants;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -41,6 +43,15 @@ import java.util.Map;
 public class ConfigUtil {
 
     protected static final Log log = LogFactory.getLog(ConfigUtil.class);
+
+    /**
+     * Run all of the configured configurations defined within the configurations.xml file
+     */
+    public static void runConfigurations() {
+        File configurationFile = ConfigUtil.getConfigurationFile("configurations.xml");
+        ConfigurationList configurationList = ConfigurationList.readFromFile(configurationFile);
+        Context.getService(ConfigManagerService.class).runConfigurations(configurationList);
+    }
 
     /**
      * @return the configuration directory
@@ -163,37 +174,31 @@ public class ConfigUtil {
     /**
      * Parses a SQL script from a file into multiple statements
      */
-    public static String[] parseScriptIntoStatements(File sqlFile) {
+    public static String[] parseScriptIntoStatements(BufferedReader reader) throws IOException {
         List<String> ret = new ArrayList<String>();
         String delimiter = ";";
         StringBuilder statement = new StringBuilder();
-        try {
-            BufferedReader br = new BufferedReader(new FileReader(sqlFile));
-            for (String line = br.readLine(); line != null; line = br.readLine()) {
-                if (line != null) {
-                    line = line.trim();
-                    if (!(org.apache.commons.lang3.StringUtils.isBlank(line) || line.startsWith("--") || line.startsWith("//"))) { // Ignore comments and blank lines
-                        if (line.toUpperCase().startsWith("DELIMITER")) {
-                            delimiter = line.substring(9).trim();
+        for (String line = reader.readLine(); line != null; line = reader.readLine()) {
+            if (line != null) {
+                line = line.trim();
+                if (!(org.apache.commons.lang3.StringUtils.isBlank(line) || line.startsWith("--"))) { // Ignore comments and blank lines
+                    if (line.toUpperCase().startsWith("DELIMITER")) {
+                        delimiter = line.substring(9).trim();
+                    }
+                    else {
+                        if (line.endsWith(delimiter)) {
+                            line = line.substring(0, line.lastIndexOf(delimiter));
+                            statement.append(line);
+                            ret.add(statement.toString());
+                            statement = new StringBuilder();
                         }
                         else {
-                            if (line.endsWith(delimiter)) {
-                                line = line.substring(0, line.lastIndexOf(delimiter));
-                                statement.append(line);
-                                ret.add(statement.toString());
-                                statement = new StringBuilder();
-                            }
-                            else {
-                                statement.append(line).append("\n");
-                            }
+                            statement.append(line).append("\n");
                         }
-
                     }
+
                 }
             }
-        }
-        catch (Exception e) {
-            throw new ConfigurationException("Error parsing " + sqlFile + " into SQL statements", e);
         }
         return ret.toArray(new String[ret.size()]);
     }

@@ -70,8 +70,12 @@ public class ConfigManagerServiceImpl extends BaseOpenmrsService implements Conf
                     for (String sql : sqlStatements) {
                         PreparedStatement statement = null;
                         try {
+                            log.debug("Executing SQL:\n" + sql);
                             statement = connection.prepareStatement(sql);
                             statement.executeUpdate();
+                        }
+                        catch (Exception e) {
+                            throw new ConfigurationException("Unable to execute SQL statement:\n" + sql, e);
                         }
                         finally {
                             try {

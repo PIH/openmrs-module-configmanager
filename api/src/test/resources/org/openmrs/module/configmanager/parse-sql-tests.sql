@@ -1,5 +1,12 @@
 
--- Ensure a provider account with the given identifier exists for the given user
+-- Make sure we support comments
+
+update encounter_type set name = 'et1' where encounter_type_id = 1;
+update encounter_type set name = 'et2' where encounter_type_id = 2;
+
+-- Make sure we support changing delimiters
+
+DELIMITER !!
 
 CREATE PROCEDURE ensure_provider(
   _username            VARCHAR(255),
@@ -17,4 +24,9 @@ BEGIN
     INSERT INTO provider (person_id, identifier, creator, date_created, uuid) VALUES (_person_id, _provider_identifier, 1, now(), uuid());
   END IF;
 
-END;
+END
+!!
+
+DELIMITER ;
+
+update encounter_type set name = 'et4' where encounter_type_id = 4;
