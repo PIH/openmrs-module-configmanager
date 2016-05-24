@@ -16,14 +16,21 @@ package org.openmrs.module.configmanager.service;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.jdbc.Work;
 import org.openmrs.api.context.Context;
+import org.openmrs.api.db.hibernate.DbSession;
+import org.openmrs.api.db.hibernate.DbSessionFactory;
 import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.module.configmanager.ConfigUtil;
+import org.openmrs.module.configmanager.ConfigurationException;
 import org.openmrs.module.configmanager.handler.ConfigurationHandler;
 import org.openmrs.module.configmanager.schema.ConfigElement;
 import org.openmrs.module.configmanager.schema.ConfigurationList;
 
 import java.io.File;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,7 +40,8 @@ import java.util.Map;
 public class ConfigManagerServiceImpl extends BaseOpenmrsService implements ConfigManagerService {
 
 	protected static final Log log = LogFactory.getLog(ConfigManagerServiceImpl.class);
-    protected Map<String, ConfigurationHandler> handlerMap = null;
+    private DbSessionFactory sessionFactory;
+    private Map<String, ConfigurationHandler> handlerMap = null;
 
 	/**
 	 * @see ConfigManagerService#runConfigurations(ConfigurationList)
@@ -51,6 +59,34 @@ public class ConfigManagerServiceImpl extends BaseOpenmrsService implements Conf
 	}
 
     /**
+     * @see ConfigManagerService#executeSql(String)
+     */
+    @Override
+    public void executeSql(final String sql) {
+        try {
+            DbSession session = sessionFactory.getCurrentSession();
+            session.doWork(new Work() {
+                public void execute(Connection connection) throws SQLException {
+                    PreparedStatement statement = null;
+                    try {
+                        statement = connection.prepareStatement(sql);
+                        statement.executeUpdate();
+                    }
+                    finally {
+                        try {
+                            statement.close();
+                        }
+                        catch (Exception e) { }
+                    }
+                }
+            });
+        }
+        catch (Exception e) {
+            throw new ConfigurationException("Unable to execute query", e);
+        }
+    }
+
+    /**
      * @return the handler with the given key
      */
     protected ConfigurationHandler getHandler(String key) {
@@ -61,5 +97,9 @@ public class ConfigManagerServiceImpl extends BaseOpenmrsService implements Conf
             }
         }
         return handlerMap.get(key);
+    }
+
+    public void setSessionFactory(DbSessionFactory sessionFactory) {
+        this.sessionFactory = sessionFactory;
     }
 }

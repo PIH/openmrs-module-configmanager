@@ -30,7 +30,9 @@ public class ConfigManagerTestUtil extends BaseModuleContextSensitiveTest {
         OutputStream out = null;
         try {
             in = OpenmrsClassLoader.getInstance().getResourceAsStream("org/openmrs/module/configmanager/" + fromPath);
-            out = new FileOutputStream(ConfigUtil.getConfigurationFile(toPath));
+            File outFile = ConfigUtil.getConfigurationFile(toPath);
+            outFile.getParentFile().mkdirs();
+            out = new FileOutputStream(outFile);
             IOUtils.copy(in, out);
         }
         finally {

@@ -14,7 +14,6 @@ import org.openmrs.module.configmanager.schema.ConfigurationList;
 import org.openmrs.module.configmanager.service.ConfigManagerService;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 
-import java.io.File;
 import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.List;

@@ -14,10 +14,8 @@
 
 package org.openmrs.module.configmanager.service;
 
-import org.openmrs.OpenmrsObject;
 import org.openmrs.api.OpenmrsService;
 import org.openmrs.module.configmanager.schema.ConfigurationList;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -30,4 +28,9 @@ public interface ConfigManagerService extends OpenmrsService {
      * Runs all of the configured configurations
 	 */
 	void runConfigurations(ConfigurationList configurationList);
+
+    /**
+     * Executes the passed SQL
+     */
+    void executeSql(final String sql);
 }

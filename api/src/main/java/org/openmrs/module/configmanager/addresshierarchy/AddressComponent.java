@@ -1,4 +1,4 @@
-package org.openmrs.module.configmanager.schema;
+package org.openmrs.module.configmanager.addresshierarchy;
 
 import org.openmrs.module.addresshierarchy.AddressField;
 import org.openmrs.util.OpenmrsUtil;

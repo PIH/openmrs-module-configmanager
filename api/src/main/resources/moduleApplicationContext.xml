@@ -8,6 +8,7 @@
         <property name="transactionManager"><ref bean="transactionManager"/></property>
         <property name="target">
             <bean class="org.openmrs.module.configmanager.service.ConfigManagerServiceImpl">
+                <property name="sessionFactory"><ref bean="dbSessionFactory"/></property>
             </bean>
         </property>
         <property name="preInterceptors">

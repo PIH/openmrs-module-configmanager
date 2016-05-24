@@ -16,7 +16,12 @@ package org.openmrs.module.configmanager;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.BaseModuleActivator;
+import org.openmrs.module.configmanager.schema.ConfigurationList;
+import org.openmrs.module.configmanager.service.ConfigManagerService;
+
+import java.io.File;
 
 /**
  * This class contains the logic that is run every time this module is either started or stopped.
@@ -30,7 +35,10 @@ public class ConfigManagerActivator extends BaseModuleActivator {
 	 */
 	public void started() {
 		log.info("Config Manager module started");
-	}
+        File configurationFile = ConfigUtil.getConfigurationFile("configurations.xml");
+        ConfigurationList configurationList = ConfigurationList.readFromFile(configurationFile);
+        Context.getService(ConfigManagerService.class).runConfigurations(configurationList);
+    }
 
 	/**
 	 * @see BaseModuleActivator#stopped()

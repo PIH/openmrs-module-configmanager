@@ -1,12 +1,12 @@
 package org.openmrs.module.configmanager.handler;
 
 import org.openmrs.Location;
-import org.openmrs.annotation.Handler;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.configmanager.csv.CsvParser;
 import org.openmrs.module.configmanager.csv.CsvRow;
 import org.openmrs.module.configmanager.schema.ConfigParameter;
 import org.openmrs.util.OpenmrsUtil;
+import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.util.HashMap;
@@ -16,7 +16,7 @@ import java.util.Map;
 /**
  * Configures a row of Location information
  */
-@Handler
+@Component("configmanager-locationhandler")
 public class LocationHandler extends BaseConfigurationHandler {
 
     /**
