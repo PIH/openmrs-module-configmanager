@@ -1,7 +1,7 @@
 package org.openmrs.module.configmanager.handler;
 
-import org.apache.commons.io.FileUtils;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.configmanager.ConfigUtil;
 import org.openmrs.module.configmanager.ConfigurationException;
 import org.openmrs.module.configmanager.schema.ConfigParameter;
 import org.openmrs.module.configmanager.service.ConfigManagerService;
@@ -28,8 +28,8 @@ public class SqlHandler extends BaseConfigurationHandler {
      */
     public void handle(File configFile, List<ConfigParameter> parameters) {
         try {
-            String sql = FileUtils.readFileToString(configFile, "UTF-8");
-            Context.getService(ConfigManagerService.class).executeSql(sql);
+            String[] statements = ConfigUtil.parseScriptIntoStatements(configFile);
+            Context.getService(ConfigManagerService.class).executeSql(statements);
         }
         catch (Exception e) {
             throw new ConfigurationException("Unable to execute SQL file at " + configFile, e);

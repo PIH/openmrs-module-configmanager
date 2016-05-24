@@ -23,12 +23,16 @@ import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.util.OpenmrsConstants;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -154,5 +158,43 @@ public class ConfigUtil {
             log.warn("Error computing checksum of " + file, e);
         }
         return "";
+    }
+
+    /**
+     * Parses a SQL script from a file into multiple statements
+     */
+    public static String[] parseScriptIntoStatements(File sqlFile) {
+        List<String> ret = new ArrayList<String>();
+        String delimiter = ";";
+        StringBuilder statement = new StringBuilder();
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(sqlFile));
+            for (String line = br.readLine(); line != null; line = br.readLine()) {
+                if (line != null) {
+                    line = line.trim();
+                    if (!(org.apache.commons.lang3.StringUtils.isBlank(line) || line.startsWith("--") || line.startsWith("//"))) { // Ignore comments and blank lines
+                        if (line.toUpperCase().startsWith("DELIMITER")) {
+                            delimiter = line.substring(9).trim();
+                        }
+                        else {
+                            if (line.endsWith(delimiter)) {
+                                line = line.substring(0, line.lastIndexOf(delimiter));
+                                statement.append(line);
+                                ret.add(statement.toString());
+                                statement = new StringBuilder();
+                            }
+                            else {
+                                statement.append(line).append("\n");
+                            }
+                        }
+
+                    }
+                }
+            }
+        }
+        catch (Exception e) {
+            throw new ConfigurationException("Error parsing " + sqlFile + " into SQL statements", e);
+        }
+        return ret.toArray(new String[ret.size()]);
     }
 }

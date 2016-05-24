@@ -32,5 +32,5 @@ public interface ConfigManagerService extends OpenmrsService {
     /**
      * Executes the passed SQL
      */
-    void executeSql(final String sql);
+    void executeSql(final String... sqlStatements);
 }

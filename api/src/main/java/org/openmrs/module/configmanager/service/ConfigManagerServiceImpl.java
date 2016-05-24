@@ -59,24 +59,26 @@ public class ConfigManagerServiceImpl extends BaseOpenmrsService implements Conf
 	}
 
     /**
-     * @see ConfigManagerService#executeSql(String)
+     * @see ConfigManagerService#executeSql(String[])
      */
     @Override
-    public void executeSql(final String sql) {
+    public void executeSql(final String... sqlStatements) {
         try {
             DbSession session = sessionFactory.getCurrentSession();
             session.doWork(new Work() {
                 public void execute(Connection connection) throws SQLException {
-                    PreparedStatement statement = null;
-                    try {
-                        statement = connection.prepareStatement(sql);
-                        statement.executeUpdate();
-                    }
-                    finally {
+                    for (String sql : sqlStatements) {
+                        PreparedStatement statement = null;
                         try {
-                            statement.close();
+                            statement = connection.prepareStatement(sql);
+                            statement.executeUpdate();
                         }
-                        catch (Exception e) { }
+                        finally {
+                            try {
+                                statement.close();
+                            }
+                            catch (Exception e) { }
+                        }
                     }
                 }
             });
